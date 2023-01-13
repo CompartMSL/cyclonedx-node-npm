@@ -21,9 +21,9 @@ import { Builders, Enums, Factories, Serialize, Spec } from '@cyclonedx/cycloned
 import { Argument, Command, Option } from 'commander'
 import { existsSync, openSync, writeSync } from 'fs'
 import { dirname, resolve } from 'path'
-import { addLicenseTextsToBom } from './licensetexts.js'
 
 import { BomBuilder, TreeBuilder } from './builders'
+import { addLicenseTextsToBom, checkLicenseGaps } from './licensetexts.js'
 
 enum OutputFormat {
   JSON = 'JSON',
@@ -47,6 +47,7 @@ interface CommandOptions {
   shortPURLs: boolean
   outputReproducible: boolean
   addLicenseText: boolean
+  checkLicenseGaps: boolean
   outputFormat: OutputFormat
   outputFile: string
   mcType: Enums.ComponentType
@@ -119,6 +120,11 @@ function makeCommand (process: NodeJS.Process): Command {
       'Whether to go the extra mile and add license texts from the package files.\n' +
       'This requires more resources, and results in much bigger output and \n' +
       'trust the package that the text in a license file corresponds to the one in package.json.'
+    ).default(false)
+  ).addOption(
+    new Option(
+      '--check-license-gaps',
+      'Reports packages without license and/or license text.'
     ).default(false)
   ).addOption(
     (function () {
@@ -236,7 +242,13 @@ export function run (process: NodeJS.Process): void {
   ).buildFromProjectDir(projectDir, process)
 
   if (options.addLicenseText) {
-    addLicenseTextsToBom(bom);
+    addLicenseTextsToBom(bom, packageFile)
+  }
+  if (options.checkLicenseGaps) {
+    if (!options.addLicenseText) {
+      throw new Error('Option --check-license-gaps will only work with option --add-license-text')
+    }
+    checkLicenseGaps(bom)
   }
 
   const spec = Spec.SpecVersionDict[options.specVersion]

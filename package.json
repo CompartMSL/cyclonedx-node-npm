@@ -79,7 +79,7 @@
     "prepublishOnly": "npm run build",
     "lint": "tsc --noEmit",
     "prebuild": "node -r fs -e 'fs.rmSync(`dist`,{recursive:true,force:true})'",
-    "build": "tsc -b ./tsconfig.json",
+    "build": "tsc -b --force ./tsconfig.json",
     "cs-fix": "eslint --fix .",
     "setup-tests": "echo 'noting yet'",
     "test": "run-p --aggregate-output -lc test:*",
@@ -87,7 +87,7 @@
     "test:standard": "eslint .",
     "dogfooding:npx": "npx .",
     "dogfooding:npm-exec": "npm exec .",
-    "dogfooding:direct": "node -- bin/cyclonedx-npm-cli.js"
+    "dogfooding:direct": "node -- bin/cyclonedx-npm-cli.js --add-license-text --output-file ./SBOM.xml --output-format XML --check-license-gaps"
   },
   "jest-junit": {
     "suiteName": "jest tests",
