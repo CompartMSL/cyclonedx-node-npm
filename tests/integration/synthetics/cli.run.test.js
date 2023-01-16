@@ -213,7 +213,8 @@ describe('cli.run()', () => {
 
     const useCases = [
       { subject: 'bare', args: [] },
-      { subject: 'flatten-components', args: ['--flatten-components'] }
+      { subject: 'flatten-components', args: ['--flatten-components'] },
+      { subject: 'add-license-text', args: ['--add-license-text'] }
     ]
     const demoCases = indexNpmLsDemoData()
     describe.each(useCases)('$subject', (ud) => {
