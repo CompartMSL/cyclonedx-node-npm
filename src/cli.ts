@@ -116,7 +116,7 @@ function makeCommand (process: NodeJS.Process): Command {
   ).addOption(
     new Option(
       '--add-license-text',
-      'Whether to go the extra mile and add license texts from the package files.\n' +
+      'Whether to go the extra mile and add license texts from the package files in the "node_modules" directory.\n' +
       'This requires more resources, and results in much bigger output and \n' +
       'trust the package that the text in a license file corresponds to the one in package.json.'
     ).default(false)
@@ -236,7 +236,12 @@ export function run (process: NodeJS.Process): void {
   ).buildFromProjectDir(projectDir, process)
 
   if (options.addLicenseText) {
-    addLicenseTextsToBom(projectDir, bom)
+    if (options.packageLockOnly) {
+      myConsole.info('INFO  | option --add-license-text is neglected, caused by set option --package-lock-only')
+    } else {
+      myConsole.log('INFO   | adding license texts to BOM')
+      addLicenseTextsToBom(projectDir, bom)
+    }
   }
 
   const spec = Spec.SpecVersionDict[options.specVersion]

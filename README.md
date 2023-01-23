@@ -92,9 +92,10 @@ Options:
   --output-reproducible     Whether to go the extra mile and make the output reproducible.
                             This requires more resources, and might result in loss of time- and random-based-values.
                             (env: BOM_REPRODUCIBLE)
-  --add-license-text        Whether to go the extra mile and add license texts from the package files.
+  --add-license-text        Whether to go the extra mile and add license texts from the package files in the "node_modules" directory.
                             This requires more resources, and results in much bigger output and
-                            trust the package that the text in a license file corresponds to the one in package.json. (default: false)
+                            trust the package that the text in a license file corresponds to the one in package.json. 
+                            (default: false)
   --output-format <format>  Which output format to use.
                             (choices: "JSON", "XML", default: "JSON")
   --output-file <file>      Path to the output file.
