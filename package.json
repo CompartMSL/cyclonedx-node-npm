@@ -43,10 +43,12 @@
   "dependencies": {
     "@cyclonedx/cyclonedx-library": "^1.4.0",
     "commander": "^9.4.0",
+    "minimatch": "^6.1.6",
     "xmlbuilder2": "^3.0.2"
   },
   "devDependencies": {
     "@types/node": "^18.0.6",
+    "@types/minimatch": "^5.1.2",
     "eslint": "^8.23.0",
     "eslint-config-standard-with-typescript": "^24.0.0",
     "eslint-plugin-simple-import-sort": "^8.0.0",

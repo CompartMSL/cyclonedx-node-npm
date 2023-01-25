@@ -23,6 +23,7 @@ import { existsSync, openSync, writeSync } from 'fs'
 import { dirname, resolve } from 'path'
 
 import { BomBuilder, TreeBuilder } from './builders'
+import { LicenseBuilder } from './licenseBuilder'
 
 enum OutputFormat {
   JSON = 'JSON',
@@ -44,6 +45,7 @@ interface CommandOptions {
   specVersion: Spec.Version
   flattenComponents: boolean
   shortPURLs: boolean
+  addLicenseText: boolean
   outputReproducible: boolean
   outputFormat: OutputFormat
   outputFile: string
@@ -93,6 +95,13 @@ function makeCommand (process: NodeJS.Process): Command {
       '--short-PURLs',
       'Omit all qualifiers from PackageURLs.\n' +
       'This causes information loss in trade of shorter PURLs, which might improve digesting these strings.'
+    ).default(false)
+  ).addOption(
+    new Option(
+      '--add-license-text',
+      'Omit license texts from the package files of "node_modules" directory.\n' +
+      'This requires more resources, and results in much bigger output and \n' +
+      'trust the package that the text in a license file corresponds to the one in package.json.'
     ).default(false)
   ).addOption(
     new Option(
@@ -214,6 +223,7 @@ export function run (process: NodeJS.Process): void {
     ),
     new TreeBuilder(),
     new Factories.FromNodePackageJson.PackageUrlFactory('npm'),
+    new LicenseBuilder(),
     {
       ignoreNpmErrors: options.ignoreNpmErrors,
       metaComponentType: options.mcType,
@@ -221,7 +231,8 @@ export function run (process: NodeJS.Process): void {
       omitDependencyTypes: options.omit,
       reproducible: options.outputReproducible,
       flattenComponents: options.flattenComponents,
-      shortPURLs: options.shortPURLs
+      shortPURLs: options.shortPURLs,
+      shouldAddLicenseTexts: options.addLicenseText
     },
     myConsole
   ).buildFromProjectDir(projectDir, process)

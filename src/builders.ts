@@ -21,6 +21,7 @@ import { Builders, Enums, Factories, Models } from '@cyclonedx/cyclonedx-library
 import { PackageURL } from 'packageurl-js'
 import * as path from 'path'
 
+import { LicenseBuilder } from './licenseBuilder'
 import { makeNpmRunner, runFunc } from './npmRunner'
 import { PropertyNames, PropertyValueBool } from './properties'
 import { makeThisTool } from './thisTool'
@@ -36,6 +37,7 @@ interface BomBuilderOptions {
   reproducible?: BomBuilder['reproducible']
   flattenComponents?: BomBuilder['flattenComponents']
   shortPURLs?: BomBuilder['shortPURLs']
+  shouldAddLicenseTexts?: boolean
 }
 
 type cPath = string
@@ -46,6 +48,7 @@ export class BomBuilder {
   componentBuilder: Builders.FromNodePackageJson.ComponentBuilder
   treeBuilder: TreeBuilder
   purlFactory: Factories.FromNodePackageJson.PackageUrlFactory
+  licenseBuilder: LicenseBuilder
 
   ignoreNpmErrors: boolean
 
@@ -55,6 +58,7 @@ export class BomBuilder {
   reproducible: boolean
   flattenComponents: boolean
   shortPURLs: boolean
+  shouldAddLicenseTexts: boolean
 
   console: Console
 
@@ -63,6 +67,7 @@ export class BomBuilder {
     componentBuilder: BomBuilder['componentBuilder'],
     treeBuilder: BomBuilder['treeBuilder'],
     purlFactory: BomBuilder['purlFactory'],
+    licenseBuilder: BomBuilder['licenseBuilder'],
     options: BomBuilderOptions,
     console_: BomBuilder['console']
   ) {
@@ -70,6 +75,7 @@ export class BomBuilder {
     this.componentBuilder = componentBuilder
     this.treeBuilder = treeBuilder
     this.purlFactory = purlFactory
+    this.licenseBuilder = licenseBuilder
 
     this.ignoreNpmErrors = options.ignoreNpmErrors ?? false
     this.metaComponentType = options.metaComponentType ?? Enums.ComponentType.Library
@@ -78,6 +84,7 @@ export class BomBuilder {
     this.reproducible = options.reproducible ?? false
     this.flattenComponents = options.flattenComponents ?? false
     this.shortPURLs = options.shortPURLs ?? false
+    this.shouldAddLicenseTexts = options.shouldAddLicenseTexts ?? false
 
     this.console = console_
   }
@@ -438,6 +445,13 @@ export class BomBuilder {
     component.bomRef.value = (typeof data._id === 'string' ? data._id : undefined) ||
       /* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/prefer-nullish-coalescing -- since empty-string handling is needed */
       `${component.group || '-'}/${component.name}@${component.version || '-'}`
+
+    // Adding license texts to the different licenses
+    if (!this.packageLockOnly && this.shouldAddLicenseTexts && typeof data.path === 'string') {
+      if (this.licenseBuilder.addTexts(component.licenses, data.path) < 1) {
+        this.console.log('DEBUG | No license text added for component ' + component.name + '@' + component.version + ' ('+ data.path + ')')
+      }
+    }
 
     return component
   }
